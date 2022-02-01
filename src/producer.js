@@ -1,6 +1,6 @@
 const amqp = require('amqp-connection-manager');
 
-const QUEUE_NAME = 'demo.queue';
+const EXCHANGE_NAME = 'amq.direct';
 
 function getId() {
   return Math.floor(
@@ -19,8 +19,8 @@ function delay(timeout) {
 
 function setup(channel) {
   return Promise.all([
-    channel.assertQueue(QUEUE_NAME, { durable: true, autoDelete: false, exclusive: false }),
-    channel.bindQueue(QUEUE_NAME, 'amq.direct')
+    channel.assertExchange(EXCHANGE_NAME, 'direct', { durable: true, autoDelete: false, internal: false }),
+    channel.checkExchange(EXCHANGE_NAME)
   ]);
 }
 
@@ -51,9 +51,12 @@ async function produce() {
 
 
 async function send(channel) {
+  const ROUTE_KEY = 'demo_key';
+  const opts = { contentType: 'application/json', persistent: true };
+
   for(let idx=0; idx < 5; idx++) {
-    await channel.sendToQueue(QUEUE_NAME, { id: getId(), msg:'Hello Tau!', time: Date.now() });
-    console.log('Message sent.');
+    const hasSent = await channel.publish(EXCHANGE_NAME, ROUTE_KEY, { id: getId(), msg:'Hello Tau!', time: Date.now() }, opts);
+    if (hasSent) console.log('Message sent.');
     await delay();
   }
 }
