@@ -26,12 +26,14 @@ function process() {
 
   conn.on('connect', () => { console.log('Connected on broker.')});
 
-  conn.createChannel({
+  const channel = conn.createChannel({
     name: 'demo-consumer',
     confirm: true,
     json: true,
     setup,
   });
+
+  await channel.waitForConnect();
 }
 
 process();
