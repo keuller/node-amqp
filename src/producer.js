@@ -48,8 +48,6 @@ async function produce() {
   process.exit(0);
 }
 
-
-
 async function send(channel) {
   const ROUTE_KEY = 'demo_key';
   const opts = { contentType: 'application/json', persistent: true };
